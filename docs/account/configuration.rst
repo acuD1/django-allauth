@@ -247,6 +247,36 @@ Available settings:
   The name of the field containing the ``email``, if any. See custom
   user models.
 
+``ACCOUNT_USER_MODEL_EMAIL_FIELD_METHOD`` (default: ``ACCOUNT_USER_MODEL_EMAIL_FIELD``)
+  Handle the case where the email field is not directly on the user
+  model, but instead on a related model. This is the case when using
+  a custom user model with a separate email model.
+  The default is to use the email field directly on the user model
+  specified by ``'USER_MODEL_EMAIL_FIELD'``.
+  If the email field is on a related model, this setting should be
+  set to the name of a method on the user model that takes an email
+  and returns the email from the related model.
+
+  Example::
+
+      # In models.py
+
+      class UserEmail(models.Model):
+          user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+          email = models.EmailField(unique=True)
+
+      class CustomUser(AbstractUser):
+          email = models.EmailField(unique=True)
+
+          def get_user_email(self, email):
+              # Custom logic to get the email from the related model
+              return self.user_email.get(email=email).email
+
+      # In settings.py
+
+      ACCOUNT_USER_MODEL_EMAIL_FIELD = 'user_email__email'
+      ACCOUNT_USER_MODEL_EMAIL_FIELD_METHOD = 'get_user_email'
+
 ``ACCOUNT_USER_MODEL_USERNAME_FIELD`` (default: ``"username"``)
   The name of the field containing the ``username``, if any. See custom
   user models.
