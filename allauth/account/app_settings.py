@@ -314,6 +314,22 @@ class AppSettings(object):
         return self._setting("USER_MODEL_EMAIL_FIELD", "email")
 
     @property
+    def USER_MODEL_EMAIL_FIELD_METHOD(self):
+        """
+        Handle the case where the email field is not directly on the user
+        model, but instead on a related model. This is the case when using
+        a custom user model with a separate email model.
+        The default is to use the email field directly on the user model
+        specified by `USER_MODEL_EMAIL_FIELD`.
+        If the email field is on a related model, this setting should be
+        set to the name of a method on the user model that takes an email
+        and returns the email from the related model.
+        """
+        return self._setting(
+            "USER_MODEL_EMAIL_FIELD_METHOD", self.USER_MODEL_EMAIL_FIELD
+        )
+
+    @property
     def SESSION_COOKIE_AGE(self):
         """
         Deprecated -- use Django's settings.SESSION_COOKIE_AGE instead

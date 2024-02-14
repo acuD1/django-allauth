@@ -490,8 +490,16 @@ def filter_users_by_email(email, is_active=None, prefer_verified=False):
         q_dict = {app_settings.USER_MODEL_EMAIL_FIELD + "__iexact": email}
         user_qs = User.objects.filter(**q_dict)
         for user in user_qs.iterator():
-            user_email = getattr(user, app_settings.USER_MODEL_EMAIL_FIELD)
-            if _unicode_ci_compare(user_email, email):
+            # Handle the case where the email_method is a callable or a string
+            email_method = getattr(user, app_settings.USER_MODEL_EMAIL_FIELD_METHOD)
+            if callable(email_method):
+                try:
+                    user_email = email_method(email)
+                except TypeError:
+                    user_email = None
+            else:
+                user_email = email_method
+            if user_email and _unicode_ci_compare(user_email, email):
                 users.append(user)
     if is_active is not None:
         users = [u for u in set(users) if u.is_active == is_active]
